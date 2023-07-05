@@ -27,47 +27,44 @@ foreach my $filename (@ARGV) {
     eval {
         my $reader = Chemistry::Mol->file( $filename, format => 'sdf' );
         $reader->open( '<' );
-        my $n = 0;
         Chemistry::Atom::reset_id();
-        while( my $molecule = $reader->read_mol( $reader->fh ) ) {
-            my $dir = 'input_graph_CSV_files/data/' . basename( $filename, '.sdf' );
-            `mkdir --parents $dir`;
-            open( my $EDGES, '>', $dir . '/' . basename( $filename, '.sdf' ) . '_' . $n . '_edges.csv' );
-            open( my $VERTICES_IN, '>', $dir . '/' . basename( $filename, '.sdf' ) . '_' . $n . '_vertices_in.csv' );
-            open( my $VERTICES_OUT, '>', $dir . '/' . basename( $filename, '.sdf' ) . '_' . $n . '_vertices_out.csv' );
-            push @all_stems, './data/' . basename( $filename, '.sdf' ) . '/' . basename( $filename, '.sdf' ) . '_' . $n;
+        my $molecule = $reader->read_mol( $reader->fh );
 
-            print $EDGES 'from', 'to', 'weight';
-            print $VERTICES_IN 'id', 'mass', 'length';
-            print $VERTICES_OUT 'id', 'order';
+        my $dir = 'input_graph_CSV_files/data/' . basename( $filename, '.sdf' );
+        `mkdir --parents $dir`;
+        open( my $EDGES, '>', $dir . '/' . basename( $filename, '.sdf' ) . '_edges.csv' );
+        open( my $VERTICES_IN, '>', $dir . '/' . basename( $filename, '.sdf' ) . '_vertices_in.csv' );
+        open( my $VERTICES_OUT, '>', $dir . '/' . basename( $filename, '.sdf' ) . '_vertices_out.csv' );
+        push @all_stems, './data/' . basename( $filename, '.sdf' ) . '/' . basename( $filename, '.sdf' ) . '_' . $n;
 
-            # Print out the vertices
-            my $nvertex = 0;
-            for my $atom ($molecule->atoms) {
-                print $VERTICES_IN id_to_number $atom->id, $atom->mass, 0;
-                print $VERTICES_OUT id_to_number $atom->id, 0;
-                print $EDGES id_to_number $atom->id, id_to_number $atom->id, 0;
-                $nvertex++;
-            }
+        print $EDGES 'from', 'to', 'weight';
+        print $VERTICES_IN 'id', 'mass', 'length';
+        print $VERTICES_OUT 'id', 'order';
 
-            for my $bond ($molecule->bonds) {
-                my @atoms = map { id_to_number $_ } $bond->atoms;
-                print $VERTICES_IN $nvertex, 0, $bond->length;
-                # Edges must go to both directions
-                print $EDGES $atoms[0], $nvertex, 0;
-                print $EDGES $nvertex, $atoms[0], 0;
-                print $EDGES $nvertex, $atoms[1], 0;
-                print $EDGES $atoms[1], $nvertex, 0;
-                print $VERTICES_OUT $nvertex, $bond->order;
-                $nvertex++;
-            }
-
-            close $EDGES;
-            close $VERTICES_IN;
-            close $VERTICES_OUT;
-
-            $n++;
+        # Print out the vertices
+        my $nvertex = 0;
+        for my $atom ($molecule->atoms) {
+            print $VERTICES_IN id_to_number $atom->id, $atom->mass, 0;
+            print $VERTICES_OUT id_to_number $atom->id, 0;
+            print $EDGES id_to_number $atom->id, id_to_number $atom->id, 0;
+            $nvertex++;
         }
+
+        for my $bond ($molecule->bonds) {
+            my @atoms = map { id_to_number $_ } $bond->atoms;
+            print $VERTICES_IN $nvertex, 0, $bond->length;
+            # Edges must go to both directions
+            print $EDGES $atoms[0], $nvertex, 0;
+            print $EDGES $nvertex, $atoms[0], 0;
+            print $EDGES $nvertex, $atoms[1], 0;
+            print $EDGES $atoms[1], $nvertex, 0;
+            print $VERTICES_OUT $nvertex, $bond->order;
+            $nvertex++;
+        }
+
+        close $EDGES;
+        close $VERTICES_IN;
+        close $VERTICES_OUT;
     };
     if( $@ ) {
         $@ =~ s/\n$//;
