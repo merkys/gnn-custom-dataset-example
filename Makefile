@@ -27,7 +27,7 @@ example:
 		| paste <(tail -n +2 ${INP_GRAPH_DIR}/${EXAMPLE}_vertices_out.csv) -
 
 cleanAll distclean:
-	find ${INP_GRAPH_DIR}/data/ -type d | xargs rm -rf
+	find ${INP_GRAPH_DIR}/data -mindepth 1 -type d | xargs rm -rf
 	rm -f ${TEST_DATA_LST} ${TRAIN_DATA_LST} ${VALIDATION_DATA_LST}
 	rm -rf ${MODEL_DIR} ${RAW_TRAIN_DATA_DIR}
 	rm -rf __pycache__
