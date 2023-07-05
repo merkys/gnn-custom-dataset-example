@@ -15,8 +15,8 @@ def read_graph(files_prefix):
 	data_frame_vertices_out=pandas.read_csv(files_prefix+"_vertices_out.csv", index_col="id")
 	data_frame_edges=pandas.read_csv(files_prefix+"_edges.csv")
 	
-	x=torch.tensor(data_frame_vertices_in[['area', 'boundary', 'adjacency', 'VE', 'VESSa', 'VESSb', 'MVE', 'MVESSa', 'MVESSb', 'VE_norm', 'VESSa_norm', 'VESSb_norm', 'MVE_norm', 'MVESSa_norm', 'MVESSb_norm']].values, dtype=torch.float32)
-	y=torch.tensor(data_frame_vertices_out[['gt0_pe1']].values, dtype=torch.float32)
+	x=torch.tensor(data_frame_vertices_in[['mass', 'length']].values, dtype=torch.float32)
+	y=torch.tensor(data_frame_vertices_out[['order']].values, dtype=torch.float32)
 	edge_index=torch.tensor(data_frame_edges[['from', 'to']].values.T, dtype=torch.long)
 	edge_attr=torch.tensor(data_frame_edges[['weight']].values, dtype=torch.float32)
 	
