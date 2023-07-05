@@ -15,10 +15,10 @@ def read_graph(files_prefix):
 	data_frame_vertices_out=pandas.read_csv(files_prefix+"_vertices_out.csv", index_col="id")
 	data_frame_edges=pandas.read_csv(files_prefix+"_edges.csv")
 	
-	x=torch.tensor(data_frame_vertices_in[['mass', 'length']].values, dtype=torch.float32)
-	y=torch.tensor(data_frame_vertices_out[['order']].values, dtype=torch.float32)
+	x=torch.tensor(data_frame_vertices_in[['mass']].values, dtype=torch.float32)
+	y=torch.tensor(data_frame_vertices_out[['bond_order_sum']].values, dtype=torch.float32)
 	edge_index=torch.tensor(data_frame_edges[['from', 'to']].values.T, dtype=torch.long)
-	edge_attr=torch.tensor(data_frame_edges[['weight']].values, dtype=torch.float32)
+	edge_attr=torch.tensor(data_frame_edges[['length']].values, dtype=torch.float32)
 	
 	graph=torch_geometric.data.Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y)
 	
