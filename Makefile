@@ -16,6 +16,9 @@ train: $(MODEL_DIR)
 $(MODEL_DIR):
 	${VENV}/bin/python3 run_training.py
 
+divide:
+	find ${INP_GRAPH_DIR}/data -name '*_edges.csv' | cut -d _ -f -5 | cut -d / -f 2- | bin/divide
+
 EPOCH ?= 25
 EXAMPLE ?= $(shell head -n1 $(VALIDATION_DATA_LST))
 
