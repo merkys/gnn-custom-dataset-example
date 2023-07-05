@@ -1,3 +1,5 @@
+SHELL = /bin/bash
+
 INP_GRAPH_DIR = input_graph_CSV_files
 
 TEST_DATA_LST = $(INP_GRAPH_DIR)/testing_data_files_prefixes.txt
@@ -13,6 +15,12 @@ train: $(MODEL_DIR)
 
 $(MODEL_DIR):
 	${VENV}/bin/python3 run_training.py
+
+EXAMPLE ?= $(shell head -n1 $(VALIDATION_DATA_LST))
+
+example:
+	${VENV}/bin/python3 run_inference_for_one_graph.py ${MODEL_DIR}/epoch25.pth ${INP_GRAPH_DIR}/${EXAMPLE}_vertices_in.csv ${INP_GRAPH_DIR}/${EXAMPLE}_edges.csv /dev/stdout \
+		| paste <(tail -n +2 ${INP_GRAPH_DIR}/${EXAMPLE}_vertices_out.csv) -
 
 cleanAll distclean:
 	find ${INP_GRAPH_DIR}/data/ -type d | xargs rm -rf
