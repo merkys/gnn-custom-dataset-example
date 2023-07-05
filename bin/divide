@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+open( my $TRAIN, '>', 'input_graph_CSV_files/training_data_files_prefixes.txt' );
+open( my $TEST, '>', 'input_graph_CSV_files/testing_data_files_prefixes.txt' );
+open( my $VALID, '>', 'input_graph_CSV_files/validation_data_files_prefixes.txt' );
+
+while( <> ) {
+    my $rand = rand;
+    if( $rand < 4/6 ) {
+        print $TRAIN $_;
+    } elsif( $rand < 5/6 ) {
+        print $TEST $_;
+    } else {
+        print $VALID $_;
+    }
+}
+
+close $TRAIN;
+close $TEST;
+close $VALID;
