@@ -42,7 +42,6 @@ foreach my $filename (@ARGV) {
             print $VERTICES_OUT 'id', 'bond_order_sum';
 
             # Print out the vertices
-            my $nvertex = 0;
             for my $atom ($molecule->atoms) {
                 print $VERTICES_IN id_to_number $atom->id, $atom->mass;
                 my $bond_order_sum = 0;
@@ -51,7 +50,6 @@ foreach my $filename (@ARGV) {
                 }
                 print $VERTICES_OUT id_to_number $atom->id, $bond_order_sum;
                 print $EDGES id_to_number $atom->id, id_to_number $atom->id, 0;
-                $nvertex++;
             }
 
             for my $bond ($molecule->bonds) {
@@ -59,7 +57,6 @@ foreach my $filename (@ARGV) {
                 # Edges must go to both directions
                 print $EDGES @atoms, $bond->length;
                 print $EDGES reverse( @atoms ), $bond->length;
-                $nvertex++;
             }
 
             close $EDGES;
