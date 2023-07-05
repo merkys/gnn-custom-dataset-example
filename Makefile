@@ -16,18 +16,20 @@ train: $(MODEL_DIR)
 $(MODEL_DIR):
 	${VENV}/bin/python3 run_training.py
 
-divide:
-	find ${INP_GRAPH_DIR}/data -name '*_edges.csv' | cut -d _ -f -5 | cut -d / -f 2- | bin/divide
+divide: $(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST)
+
+$(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST):
+	find ${INP_GRAPH_DIR}/data -name '*_edges.csv' | cut -d _ -f -4 | cut -d / -f 2- | bin/divide
 
 EPOCH ?= 25
 EXAMPLE ?= $(shell head -n1 $(VALIDATION_DATA_LST))
 
-example:
+example: $(MODEL_DIR)
 	${VENV}/bin/python3 run_inference_for_one_graph.py ${MODEL_DIR}/epoch${EPOCH}.pth ${INP_GRAPH_DIR}/${EXAMPLE}_vertices_in.csv ${INP_GRAPH_DIR}/${EXAMPLE}_edges.csv /dev/stdout \
 		| paste <(tail -n +2 ${INP_GRAPH_DIR}/${EXAMPLE}_vertices_out.csv) -
 
 cleanAll distclean:
-	find ${INP_GRAPH_DIR}/data/ -type d | xargs rm -rf
+	find ${INP_GRAPH_DIR}/data -mindepth 1 -type d | xargs rm -rf
 	rm -f ${TEST_DATA_LST} ${TRAIN_DATA_LST} ${VALIDATION_DATA_LST}
 	rm -rf ${MODEL_DIR} ${RAW_TRAIN_DATA_DIR}
 	rm -rf __pycache__
