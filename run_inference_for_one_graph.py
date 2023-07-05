@@ -7,7 +7,7 @@ import numpy
 def read_graph(vertices_file, edges_file):
 	df_vertices_in=pandas.read_csv(vertices_file, index_col="id")
 	df_edges=pandas.read_csv(edges_file)
-	x=torch.tensor(df_vertices_in[['area', 'boundary', 'adjacency', 'VE', 'VESSa', 'VESSb', 'MVE', 'MVESSa', 'MVESSb', 'VE_norm', 'VESSa_norm', 'VESSb_norm', 'MVE_norm', 'MVESSa_norm', 'MVESSb_norm']].values, dtype=torch.float32)
+	x=torch.tensor(df_vertices_in[['mass', 'length']].values, dtype=torch.float32)
 	edge_index=torch.tensor(df_edges[['from', 'to']].values.T, dtype=torch.long)
 	edge_attr=torch.tensor(df_edges[['weight']].values, dtype=torch.float32)
 	graph=torch_geometric.data.Data(x=x, edge_index=edge_index, edge_attr=edge_attr)
