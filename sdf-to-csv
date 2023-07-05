@@ -46,14 +46,18 @@ foreach my $filename (@ARGV) {
             for my $atom ($molecule->atoms) {
                 print $VERTICES_IN id_to_number $atom->id, $atom->mass, 0;
                 print $VERTICES_OUT id_to_number $atom->id, 0;
+                print $EDGES id_to_number $atom->id, id_to_number $atom->id, 0;
                 $nvertex++;
             }
 
             for my $bond ($molecule->bonds) {
                 my @atoms = map { id_to_number $_ } $bond->atoms;
                 print $VERTICES_IN $nvertex, 0, $bond->length;
+                # Edges must go to both directions
                 print $EDGES $atoms[0], $nvertex, 0;
+                print $EDGES $nvertex, $atoms[0], 0;
                 print $EDGES $nvertex, $atoms[1], 0;
+                print $EDGES $atoms[1], $nvertex, 0;
                 print $VERTICES_OUT $nvertex, $bond->order;
                 $nvertex++;
             }
