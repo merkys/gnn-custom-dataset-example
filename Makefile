@@ -16,7 +16,9 @@ train: $(MODEL_DIR)
 $(MODEL_DIR):
 	${VENV}/bin/python3 run_training.py
 
-divide:
+divide: $(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST)
+
+$(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST):
 	find ${INP_GRAPH_DIR}/data -name '*_edges.csv' | cut -d _ -f -4 | cut -d / -f 2- | bin/divide
 
 EPOCH ?= 25
