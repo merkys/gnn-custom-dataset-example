@@ -9,6 +9,8 @@ VALIDATION_DATA_LST = $(INP_GRAPH_DIR)/validation_data_files_prefixes.txt
 MODEL_DIR = output_saved_trained_models
 RAW_TRAIN_DATA_DIR = training_data
 
+CONTAINER = ./container.sif
+
 VENV ?= venv
 
 train: $(MODEL_DIR)
@@ -20,6 +22,9 @@ divide: $(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST)
 
 $(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST):
 	find ${INP_GRAPH_DIR}/data -name '*_edges.csv' | cut -d _ -f -4 | cut -d / -f 2- | bin/divide
+
+%.sif: %.def
+	apptainer build $@ $<
 
 EPOCH ?= 25
 EXAMPLE ?= $(shell head -n1 $(VALIDATION_DATA_LST))
