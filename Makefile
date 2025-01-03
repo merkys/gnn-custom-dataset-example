@@ -24,7 +24,7 @@ $(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST):
 	find ${INP_GRAPH_DIR}/data -name '*_edges.csv' | cut -d _ -f -4 | cut -d / -f 2- | bin/divide
 
 %.sif: %.def
-	apptainer build $@ $<
+	apptainer build --force $@ $<
 
 EPOCH ?= 25
 EXAMPLE ?= $(shell head -n1 $(VALIDATION_DATA_LST))
