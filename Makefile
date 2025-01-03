@@ -24,13 +24,13 @@ $(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST):
 	find ${INP_GRAPH_DIR}/data -name '*_edges.csv' | cut -d _ -f -4 | cut -d / -f 2- | bin/divide
 
 %.sif: %.def
-	apptainer build $@ $<
+	apptainer build --force $@ $<
 
 EPOCH ?= 25
 EXAMPLE ?= $(shell head -n1 $(VALIDATION_DATA_LST))
 
-example: $(MODEL_DIR)
-	${VENV}/bin/python3 run_inference_for_one_graph.py ${MODEL_DIR}/epoch${EPOCH}.pth ${INP_GRAPH_DIR}/${EXAMPLE}_vertices_in.csv ${INP_GRAPH_DIR}/${EXAMPLE}_edges.csv /dev/stdout \
+example: $(CONTAINER) $(MODEL_DIR)
+	$(CONTAINER) python3 run_inference_for_one_graph.py ${MODEL_DIR}/epoch${EPOCH}.pth ${INP_GRAPH_DIR}/${EXAMPLE}_vertices_in.csv ${INP_GRAPH_DIR}/${EXAMPLE}_edges.csv /dev/stdout \
 		| paste <(tail -n +2 ${INP_GRAPH_DIR}/${EXAMPLE}_vertices_out.csv) -
 
 cleanAll distclean:

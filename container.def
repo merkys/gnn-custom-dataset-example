@@ -3,4 +3,4 @@ From: debian:unstable
 
 %post
     apt-get update
-    apt-get install --yes python3-numpy python3-pandas python3-torch-geometric
+    apt-get install --yes python3-numpy python3-pandas python3-torch python3-torch-geometric
