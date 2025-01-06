@@ -16,7 +16,7 @@ VENV ?= venv
 train: $(MODEL_DIR)
 
 $(MODEL_DIR):
-	${VENV}/bin/python3 run_training.py
+	$(CONTAINER) python3 run_training.py
 
 divide: $(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST)
 
