@@ -3,9 +3,9 @@
 use strict;
 use warnings;
 
-open( my $TRAIN, '>', 'input_graph_CSV_files/training_data_files_prefixes.txt' );
-open( my $TEST, '>', 'input_graph_CSV_files/testing_data_files_prefixes.txt' );
-open( my $VALID, '>', 'input_graph_CSV_files/validation_data_files_prefixes.txt' );
+open( my $TRAIN, '>', 'inputs/molecules-bond-sum/training_data_files_prefixes.txt' );
+open( my $TEST, '>', 'inputs/molecules-bond-sum/testing_data_files_prefixes.txt' );
+open( my $VALID, '>', 'inputs/molecules-bond-sum/validation_data_files_prefixes.txt' );
 
 while( <> ) {
     my $rand = rand;

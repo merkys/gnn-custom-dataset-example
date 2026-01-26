@@ -30,7 +30,7 @@ def train():
 		optimizer.step()
 	return loss_sum
 
-output_directory='./output_saved_trained_models'
+output_directory='./outputs/molecules-bond-sum'
 if not os.path.exists(output_directory):
 	os.makedirs(output_directory)
 

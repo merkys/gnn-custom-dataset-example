@@ -1,12 +1,12 @@
 SHELL = /bin/bash
 
-INP_GRAPH_DIR = input_graph_CSV_files
+INP_GRAPH_DIR = inputs/molecules-bond-sum
 
 TEST_DATA_LST = $(INP_GRAPH_DIR)/testing_data_files_prefixes.txt
 TRAIN_DATA_LST = $(INP_GRAPH_DIR)/training_data_files_prefixes.txt
 VALIDATION_DATA_LST = $(INP_GRAPH_DIR)/validation_data_files_prefixes.txt
 
-MODEL_DIR = output_saved_trained_models
+MODEL_DIR = outputs/molecules-bond-sum
 RAW_TRAIN_DATA_DIR = training_data
 
 CONTAINER = ./container.sif
