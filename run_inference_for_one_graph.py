@@ -23,7 +23,7 @@ device=torch.device('cpu')
 data=read_graph(input_vertices_file, input_edges_file)
 data=data.to(device)
 
-model=torch.load(model_file)
+model=torch.load(model_file, weights_only=False)
 model=model.to(device)
 model.eval()
 

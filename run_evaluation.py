@@ -19,7 +19,7 @@ def calc_mse(data):
 	return loss.item()
 
 for model_file in model_files:
-	model=torch.load(model_file)
+	model=torch.load(model_file, weights_only=False)
 	model=model.to(device)
 	
 	mse_sum=0
