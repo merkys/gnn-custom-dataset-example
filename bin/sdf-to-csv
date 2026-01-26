@@ -28,7 +28,7 @@ foreach my $filename (@ARGV) {
         $reader->open( '<' );
         Chemistry::Atom::reset_id();
         my $molecule = $reader->read_mol( $reader->fh );
-        my $dir = 'inputs/molecules-bond-sum/data/' . basename( $filename, '.sdf' );
+        my $dir = 'inputs/molecules-aromatic/data/' . basename( $filename, '.sdf' );
         `mkdir --parents $dir`;
         open( my $EDGES, '>', $dir . '/' . basename( $filename, '.sdf' ) . '_edges.csv' );
         open( my $VERTICES_IN, '>', $dir . '/' . basename( $filename, '.sdf' ) . '_vertices_in.csv' );

@@ -35,8 +35,8 @@ class CustomDataset(torch_geometric.data.InMemoryDataset):
 		return ['data.pt']
 	
 	def process(self):
-		raw_prefixes=read_list_of_strings("./inputs/molecules-bond-sum/"+self.root+"_files_prefixes.txt")
-		data_list=[read_graph("./inputs/molecules-bond-sum/"+raw_prefix) for raw_prefix in raw_prefixes]
+		raw_prefixes=read_list_of_strings("./inputs/molecules-aromatic/"+self.root+"_files_prefixes.txt")
+		data_list=[read_graph("./inputs/molecules-aromatic/"+raw_prefix) for raw_prefix in raw_prefixes]
 	
 		if self.pre_filter is not None:
 			data_list=[data for data in data_list if self.pre_filter(data)]
