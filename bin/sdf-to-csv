@@ -5,7 +5,11 @@ use warnings;
 
 use Chemistry::Mol;
 use Chemistry::File::SDF;
+use Chemistry::OpenSMILES qw( is_aromatic_bond is_cis_trans_bond );
+use Chemistry::OpenSMILES::Parser;
 use File::Basename qw( basename );
+use Graph::Nauty qw( are_isomorphic canonical_order );
+use List::Util qw( first );
 
 my $program = basename $0;
 
@@ -13,21 +17,44 @@ my $program = basename $0;
 
 Chemistry::Mol->register_format( sdf => Chemistry::File::SDF:: );
 
+my $parser = Chemistry::OpenSMILES::Parser->new;
+
 $\ = "\n";
 $, = ',';
 
+sub atom_is_aromatic($$$);
+sub chemistry_mol_to_graph($);
 sub id_to_number($);
+sub merge_graphs(@);
+sub simplify_for_overlay($);
 
 foreach my $filename (@ARGV) {
     local $SIG{__WARN__} = sub {
         print STDERR "$program: $filename: $_[0]"
     };
 
+    my $basename = basename( $filename, '.sdf' );
+    my $smi = `grep $basename\$ ~/struct/cod/smi/allcod.smi`;
+    next unless $smi;
+    ($smi) = split /\s+/, $smi;
+
     eval {
         my $reader = Chemistry::Mol->file( $filename, format => 'sdf' );
         $reader->open( '<' );
-        Chemistry::Atom::reset_id();
-        my $molecule = $reader->read_mol( $reader->fh );
+        Chemistry::Atom::reset_id;
+        my $sdf_molecule = $reader->read_mol( $reader->fh );
+        my $sdf_graph = chemistry_mol_to_graph $sdf_molecule;
+        my $smi_graph = merge_graphs $parser->parse( $smi );
+
+        if( !are_isomorphic( $sdf_graph->copy,
+                             $smi_graph->copy,
+                             sub { ucfirst $_[0]->{symbol} } ) ) {
+            die "graphs are not isomorphic\n";
+        }
+
+        my @sdf_order = canonical_order( $sdf_graph->copy, sub { ucfirst $_[0]->{symbol} } );
+        my @smi_order = canonical_order( $smi_graph->copy, sub { ucfirst $_[0]->{symbol} } );
+
         my $dir = 'inputs/molecules-aromatic/data/' . basename( $filename, '.sdf' );
         `mkdir --parents $dir`;
         open( my $EDGES, '>', $dir . '/' . basename( $filename, '.sdf' ) . '_edges.csv' );
@@ -36,20 +63,16 @@ foreach my $filename (@ARGV) {
 
         print $EDGES 'from', 'to', 'length';
         print $VERTICES_IN 'id', 'mass';
-        print $VERTICES_OUT 'id', 'bond_order_sum';
+        print $VERTICES_OUT 'id', 'is_aromatic';
 
         # Print out the vertices
-        for my $atom ($molecule->atoms) {
+        for my $atom ($sdf_molecule->atoms) {
             print $VERTICES_IN id_to_number $atom->id, $atom->mass;
-            my $bond_order_sum = 0;
-            for my $bond ($atom->bonds) {
-                $bond_order_sum += $bond->order;
-            }
-            print $VERTICES_OUT id_to_number $atom->id, $bond_order_sum;
+            print $VERTICES_OUT id_to_number $atom->id, 0 + atom_is_aromatic id_to_number $atom->id, \@sdf_order, \@smi_order;
             print $EDGES id_to_number $atom->id, id_to_number $atom->id, 0;
         }
 
-        for my $bond ($molecule->bonds) {
+        for my $bond ($sdf_molecule->bonds) {
             my @atoms = map { id_to_number $_ } $bond->atoms;
             # Edges must go to both directions
             print $EDGES @atoms, $bond->length;
@@ -62,9 +85,45 @@ foreach my $filename (@ARGV) {
     };
     if( $@ ) {
         $@ =~ s/\n$//;
-        print STDERR "$program: $filename: $@\n";
+        print STDERR "$program: $filename: $@";
     }
 
+}
+
+sub atom_is_aromatic($$$)
+{
+    my( $sdf_number, $sdf_order, $smi_order ) = @_;
+    my $pos = first { $sdf_order->[$_]{number} == $sdf_number } 0..$#$sdf_order;
+    return $smi_order->[$pos]{symbol} ne ucfirst $smi_order->[$pos]{symbol};
+}
+
+my @edge_symbol = ( undef, '=', '#', '$' );
+
+sub chemistry_mol_to_graph($)
+{
+    my $molecule = shift;
+
+    my $graph = Graph::Undirected->new( refvertexed => 1 );
+    my %atom_to_vertex;
+    my %vertex_to_atom;
+
+    for my $atom ($molecule->atoms) {
+        my $vertex = { number => id_to_number $atom->id,
+                       symbol => $atom->symbol };
+        $graph->add_vertex( $vertex );
+        $atom_to_vertex{$atom} = $vertex;
+        $vertex_to_atom{$vertex} = $atom;
+    }
+
+    for my $bond ($molecule->bonds) {
+        $graph->add_edge( map { $atom_to_vertex{$_} } $bond->atoms );
+        next if $bond->order < 2 || $bond->order > 4;
+        $graph->set_edge_attribute( (map { $atom_to_vertex{$_} } $bond->atoms),
+                                    'bond',
+                                    $edge_symbol[$bond->order] );
+    }
+
+    return $graph;
 }
 
 sub id_to_number($)
@@ -73,4 +132,40 @@ sub id_to_number($)
     $id =~ s/^a//;
     $id--;
     return $id;
+}
+
+sub merge_graphs(@)
+{
+    my $graph = Graph::Undirected->new( refvertexed => 1 );
+    for my $g (@_) {
+        $graph->add_vertices( $g->vertices );
+        for my $e ($g->edges) {
+            if( $g->has_edge_attributes( @$e ) ) {
+                $graph->set_edge_attributes( @$e, $g->get_edge_attributes( @$e ) );
+            } else {
+                $graph->add_edge( @$e );
+            }
+        }
+    }
+    return $graph;
+}
+
+sub simplify_for_overlay($)
+{
+    my $graph = shift;
+    $graph = $graph->deep_copy;
+
+    for my $atom ($graph->vertices) {
+        $atom->{symbol} = ucfirst $atom->{symbol}; # unset aromaticity
+        delete $atom->{chirality};
+        delete $atom->{chirality_neighbours};
+        delete $atom->{class};
+    }
+
+    for my $edge ($graph->edges) {
+        next unless $graph->has_edge_attribute( @$edge, 'bond' );
+        $graph->delete_edge_attribute( @$edge, 'bond' );
+    }
+
+    return $graph;
 }
