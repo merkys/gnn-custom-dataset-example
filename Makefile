@@ -21,7 +21,7 @@ $(MODEL_DIR):
 divide: $(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST)
 
 $(TEST_DATA_LST) $(TRAIN_DATA_LST) $(VALIDATION_DATA_LST):
-	find ${INP_GRAPH_DIR}/data -name '*_edges.csv' | cut -d _ -f -4 | cut -d / -f 2- | bin/divide
+	find ${INP_GRAPH_DIR}/data -name '*_edges.csv' | cut -d / -f 3- | cut -d _ -f 1 | bin/divide
 
 %.sif: %.def
 	apptainer build --force $@ $<
