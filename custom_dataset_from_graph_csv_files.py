@@ -16,7 +16,7 @@ def read_graph(files_prefix):
 	data_frame_edges=pandas.read_csv(files_prefix+"_edges.csv")
 	
 	x=torch.tensor(data_frame_vertices_in[['mass']].values, dtype=torch.float32)
-	y=torch.tensor(data_frame_vertices_out[['bond_order_sum']].values, dtype=torch.float32)
+	y=torch.tensor(data_frame_vertices_out[['is_aromatic']].values, dtype=torch.float32)
 	edge_index=torch.tensor(data_frame_edges[['from', 'to']].values.T, dtype=torch.long)
 	edge_attr=torch.tensor(data_frame_edges[['length']].values, dtype=torch.float32)
 	
