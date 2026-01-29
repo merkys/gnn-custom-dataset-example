@@ -11,13 +11,13 @@ class CustomGNN(torch.nn.Module):
 		self.conv4=torch_geometric.nn.GATv2Conv(16*8, 8, heads=8, edge_dim=1, add_self_loops=False, dropout=0.25)
 		self.lin1=torch.nn.Linear(8*8, 1)
 	
-	def forward(self, data):
+	def forward(self, data, edge_index):
 		x=data.x
-		x=self.conv1(x, data.edge_index, data.edge_attr)
+		x=self.conv1(x, edge_index, data.edge_attr)
 		x=torch.nn.functional.elu(x)
-		x=self.conv2(x, data.edge_index, data.edge_attr)
+		x=self.conv2(x, edge_index, data.edge_attr)
 		x=torch.nn.functional.elu(x)
-		x=self.conv3(x, data.edge_index, data.edge_attr)
+		x=self.conv3(x, edge_index, data.edge_attr)
 		x=torch.nn.functional.elu(x)
-		x=self.conv4(x, data.edge_index, data.edge_attr)
+		x=self.conv4(x, edge_index, data.edge_attr)
 		return self.lin1(x)

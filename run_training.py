@@ -23,7 +23,7 @@ def train():
 	for data in data_loader:
 		data=data.to(device)
 		optimizer.zero_grad()
-		pred_y=model(data)
+		pred_y=model(data, data.edge_index)
 		loss=torch.nn.functional.mse_loss(pred_y.squeeze(), data.y.squeeze())
 		loss.backward()
 		loss_sum+=data.num_graphs*loss.item()
